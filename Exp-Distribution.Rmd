@@ -1,0 +1,80 @@
+---
+title: "Exponential Distribution"
+author: "Dimas Adinugroho"
+date: "March 29, 2016"
+output: html_document
+---
+Project kali ini akan mencoba untuk membandingkan exponential distribution dengan Central Limit Theorem (CLT). Exponential Distribution di simulasikan dengan fungsi rexp(n, lambda), dimana lambda adalah rate parameter.Untuk besar mean = standard deviasi = 1/lambda. 
+
+Purpose: mensimulasikan rata-rata distribusi dari 40 exponential. (perlu melakukan banyak simulasi)
+
+```{r, warning=FALSE , message=FALSE}
+library(ggplot2)
+library(reshape2)
+library(moments)
+```
+
+```{r, results = "hide"}
+simulasi <- 1000 #banyaknya simulasi yang dilakukan
+n <- 40 #banyaknya sample per simulasi
+lambda <- 0.2 #disetting untuk semua simulasi 
+set.seed(1112) #random number generator
+
+```
+
+buat Matrix untuk menyimpan hasil data exponential distribution: 
+
+```{r, results = 'hide', cache=TRUE}
+#terdapat 40.000 data , buat matrix per simulasi yang dilakukan
+sim_exp <- matrix(data = rexp(simulasi*n,lambda), ncol = n, nrow = simulasi, byrow = TRUE)
+sim_mean <- rowMeans(sim_exp) #mencari nilai rata rata dari tiap simulasi
+```
+
+Coba simulasikan data yang didapat dengan menggunakan histogram:
+```{r, cache=TRUE}
+hist(sim_mean,col = "red")
+
+
+```
+
+## Mean and Standard Deviation Comparison
+Kita coba membandingkan hasil mean dan sd dari teori dengan data yang aslinya. Pada exponential distribution, maka mean = standard deviasi = 1/(lambda*n).   
+
+untuk nilai mean:
+```{r}
+mean_theory <- 1/lambda # mean = 5
+mean_data <- mean(sim_mean) #mean = 4.974527
+```
+untuk nilai variance:
+```{r}
+var_theory <- 1/(lambda^2*n) # variance = 0.625
+var_data <- var(sim_mean) # variance =  0.7870108
+```
+
+## Mendekati normal distribution
+Berikut merupakan bentukha distribusi dari simulasi yang dilakukan, bentuknya mendekati dengan  normal distribution (Gaussian)
+
+
+```{r}
+plots <- ggplot(data=melt(sim_mean), aes(value,..density..)) 
+plots +  geom_density(kernel = "gaussian", col = 'black',size = 1) + geom_histogram(colour="black", fill = "NA") #density disini sebagai sumbu y,yang merepresentasikan banyaknya count/total count
+```
+
+Q-Q plot digunakan untuk menentukan apakah dua data set diambil dari populasi dengan distribusi yang sama. Diplot dengan membandingkan nilai quantile data 1 dengan data 2. Di R, dapat dicari dengan menggunakan qqplot. qqnorm digunakan untuk membandingkan quantile data dengan normal distribution (yang secara teori)  
+
+```{r}
+qqnorm(sim_mean)
+qqline(sim_mean)
+
+```
+
+Data berada di garis lurus qqline, menandakan bahwa data sama dengan normal distribution secara theory.Ciri-cir dari normal distribution adalah mean = median = modus dan symmetris berada di mean nya. Jika melihat skewness dan kurtosis dari grafiknya, skewness/kecondongannya mendekati 0, dimana mean = modusnya, sedangkan untuk kurtosisnya mendekati 3, dimana ini merupakan ciri-ciri dari normal distribution.
+
+```{r}
+
+kurtosis(sim_mean)
+skewness(sim_mean)
+summary(sim_mean)
+
+```
+kesimpulannya theorema CLT berlaku disini, dimana sample yang banyak akan mendekati distribusi normal

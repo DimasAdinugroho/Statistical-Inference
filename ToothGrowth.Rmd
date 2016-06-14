@@ -1,0 +1,126 @@
+---
+title: "ToothGrowth"
+author: "Dimas Adinugroho"
+date: "25 Mei 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Statistical Inference Project 2
+
+Now in the second portion of the class, we're going to analyze the ToothGrowth data in the R datasets package.   
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses 
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+4. State your conclusions and the assumptions needed for your conclusions.   
+
+###Some criteria that you will be evaluated on  
+
+* Did you perform an exploratory data analysis of at least a single plot or table highlighting basic features of the data?
+* Did the student perform some relevant confidence intervals and/or tests?  
+* Were the results of the tests and/or intervals interpreted in the context of the problem correctly?  
+* Did the student describe the assumptions needed for their conclusions?
+
+### Data
+
+The Dataset for this assignment are available by typing: 
+```{r}
+library(datasets)
+library(ggplot2)
+data(ToothGrowth)
+str(ToothGrowth)
+```
+
+This Data about: *'The Effect of Vitamin C on Tooth Growth in Guinea Pigs'*. The response is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pig. The variable in dataset (you can see by type: help(ToothGrowth)):
+
+* ``len``: The length of odontoblast
+* ``supp``: Two delivery method (one method per 30 guinea pigs), OJ (Orange Juice) and VS (Vitamin C)
+* ``dose``: Dose level of vitamin C (0.5 , 1, and 2 mg/day)
+
+## exploratory data analysis
+
+Difference between length Of Supplement VC and OJ 
+```{r}
+p <- ggplot(ToothGrowth, aes(factor(supp), len, fill = supp))
+p + geom_boxplot() + xlab("Dose in miligrams") + ylab("Tooth length") + guides(fill=guide_legend(title="Supplement type"))
+```
+
+Difference between length of VC and OJ by dose 
+```{r}
+q <- ggplot(ToothGrowth, aes(factor(dose), len, fill = supp))
+q + geom_bar(stat = 'identity') + facet_grid(. ~ supp)   + xlab("Dose in miligrams") + ylab("Tooth length") + guides(fill=guide_legend(title="Dose"))
+```
+
+
+## Hypothesis Test of Tooth Growth
+
+There are to test, First, we wanted to know if there are difference of tooth growth by different supplement type.Thus the Null Hypothesis is:
+
+<p align="center">
+  ``H0: The Vitamin C and Orange Juice helps tooth to growth with same size`` (U<sub>vc</sub> == U<sub>OJ</sub>)
+</p>
+
+versus the Hypothesis:
+</p>
+<p align="center">
+``H1: There are difference of tooth growth caused by different type of supplement`` (U<sub>vc</sub> != U<sub>OJ</sub>)
+</p>
+</p>
+</p>
+So we set:
+```{r}
+OJ.len<- ToothGrowth[ToothGrowth$supp == 'OJ',]$len
+VC.len<- ToothGrowth[ToothGrowth$supp == 'VC',]$len
+n <- 30
+alpha <- 0.05 #confidence interval 95%, alpha 5%
+ttest <- t.test(OJ.len,VC.len, alternative = "two.sided")
+ttest$conf.int
+ttest$p.value
+ttest$p.value < alpha
+```
+As we in the result, the p value is much greater tha  alpha. So as we see in the below analysis, we have weak evidence againt the null hypthesis, so in conclusion, we accept the Null Hypothesis. Therefore **There are not any difference of tooth growth caused by the vitamin C and Orange Juice ** or ``there aren't any difference of tooth growth by difference medium.`` 
+
+* A small p-value (typically ≤ 0.05) indicates strong evidence against the null hypothesis, so you reject the null hypothesis.
+
+* A large p-value (> 0.05) indicates weak evidence against the null hypothesis, so you fail to reject the null hypothesis. 
+<br>
+<br>
+<br>
+Second test, we want to know that different dose of vitamin C or Orange Juice, can effect the tooth growth. So the hyphotesis test is:
+
+<p align="center">
+  ``H0: There are not any significant growth given by different dose``
+</p>
+
+versus the Hypothesis:
+</p>
+<p align="center">
+``H1: There are difference tooth growth by difference dose``
+</p>
+<br>
+So we set:
+
+```{r}
+Dose05<- ToothGrowth[ToothGrowth$dose == 0.5,]$len
+Dose10<- ToothGrowth[ToothGrowth$dose == 1.0,]$len
+Dose20<- ToothGrowth[ToothGrowth$dose == 2.0,]$len
+n <- 20
+alpha <- 0.05 #confidence interval 95%, alpha 5%
+ttest0.5_1.0 <- t.test(Dose05,Dose10, alternative = "two.sided")
+ttest1.0_2.0 <- t.test(Dose10,Dose20, alternative = "two.sided")
+ttest0.5_2.0 <- t.test(Dose05,Dose20, alternative = "two.sided")
+
+ttest0.5_1.0$p.value < alpha
+ttest1.0_2.0$p.value < alpha
+ttest0.5_2.0$p.value < alpha
+```
+
+As we see in the result, all of the P-Value is less than Alpha, Therefore we can reject the Null Hypothesis. The conclusion is **There are difference tooth growth by difference dose ** or ``"Given the different dose, can make different length of Tooth Growth."``
+<br>
+<br>
+<br>
+<P>End</p>
